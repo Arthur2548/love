@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลอยกระทงออนไลน์</title>
+    <script>
+        // If loy.html is opened directly, redirect to index.html so the site shows the homepage first.
+        // To intentionally open loy.html (bypass redirect), use the query parameter ?open=loy
+        (function(){
+            try {
+                const params = new URLSearchParams(location.search);
+                if (params.get('open') === 'loy') return; // explicit bypass
+                const path = location.pathname.toLowerCase();
+                if (path.endsWith('loy.html')) {
+                    // Use replace so back button doesn't return to loy.html
+                    location.replace('./index.html');
+                }
+            } catch (e) {
+                // if anything goes wrong, do nothing (avoid breaking the page)
+                console.error('Redirect check failed', e);
+            }
+        })();
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            padding: 20px;
+            background-color: #333;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .container {
+            margin: 20px;
+        }
+        .river {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: url('https://ia904602.us.archive.org/33/items/oittt/%5Boittt.png') no-repeat center center;
+            background-size: cover;
+            overflow: hidden;
+        }
+        .krathong {
+            width: 50px;
+            position: absolute;
+            bottom: 10px;
+            animation: floatInRiver 10s linear infinite;
+        }
+        @keyframes floatInRiver {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100vw);
+            }
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ffcc00;
+            border: none;
+            color: black;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #ffaa00;
+        }
+        footer {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .top-link{position:fixed;left:12px;top:12px;background:rgba(0,0,0,0.3);color:white;padding:8px 10px;border-radius:6px;text-decoration:none}
+    </style>
+</head>
+<body>
+    <a class="top-link" href="./index.html">กลับหน้าหลัก</a>
+    <header>
+        <h1>ลอยกระทงออนไลน์ “สืบสานประเพณี วิถีดิจิทัล”</h1>
+    </header>
+    <div class="container">
+        <p>กรอกชื่อ แล้วเลือกโหมดการลอย — ลอยคนเดียว หรือ ลอยกับคู่</p>
+
+        <form id="krathongForm" onsubmit="event.preventDefault(); releaseKrathong();" aria-label="ฟอร์มลอยกระทง">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;">
+                <div style="min-width:220px;text-align:left">
+                    <label for="name1">ชื่อผู้ลอย (คนที่ 1)</label><br>
+                    <input id="name1" name="name1" type="text" placeholder="เช่น สมชาย" style="padding:8px;width:100%;border-radius:6px;border:1px solid rgba(0,0,0,0.2);margin-top:6px">
+                </div>
+
+                <div style="min-width:200px; text-align:left">
+                    <div>
+                        <label>โหมดการลอย</label>
+                        <div style="margin-top:6px">
+                            <label><input type="radio" name="mode" value="solo" checked onchange="handleModeChange()"> ลอยคนเดียว</label>
+                            <label style="margin-left:12px"><input type="radio" name="mode" value="pair" onchange="handleModeChange()"> ลอยกับคู่</label>
+                        </div>
+                    </div>
+
+                    <div id="partnerBlock" style="margin-top:12px; display:none;">
+                        <label for="name2">ชื่อผู้ลอย (คนที่ 2)</label><br>
+                        <input id="name2" name="name2" type="text" placeholder="เช่น สมหญิง" style="padding:8px;width:100%;border-radius:6px;border:1px solid rgba(0,0,0,0.2);margin-top:6px">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:14px">
+                <button class="button" type="submit">ลอยกระทง</button>
+            </div>
+        </form>
+
+        <div class="river" id="river"></div>
+        <div id="message" style="margin-top: 20px; font-size: 1.1rem;"></div>
+    </div>
+    <footer>
+        &copy; เว็ปไซต์โครงการ ลอยกระทงออนไลน์ “สืบสานประเพณี วิถีดิจิทัล” | จัดทำโดย วิทยา หมายมั่นและคณะ.
+    </footer>
+
+    <script>
+        function handleModeChange(){
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const partnerBlock = document.getElementById('partnerBlock');
+            if(mode === 'pair') partnerBlock.style.display = 'block';
+            else partnerBlock.style.display = 'none';
+        }
+
+        function createKrathongElement(src, leftPx){
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'krathong';
+            img.style.left = leftPx + 'px';
+            return img;
+        }
+
+        function releaseKrathong(){
+            const river = document.getElementById('river');
+            const msg = document.getElementById('message');
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const name1 = (document.getElementById('name1').value || 'ผู้ลอย').trim();
+            const krathongImage = 'https://pngbie.com/assets/images/icon/anAuevvZOgPngbie-10300229301667071770.png';
+
+            if(mode === 'solo'){
+                const left = Math.random() * (window.innerWidth - 100);
+                const k = createKrathongElement(krathongImage, left);
+                river.appendChild(k);
+                msg.textContent = `${name1} ลอยกระทงคนเดียว — กระทงของคุณได้ลอยลงสู่แม่น้ำน่าน!`;
+                return;
+            }
+
+            // pair mode
+            const name2 = (document.getElementById('name2').value || 'คู่ของคุณ').trim();
+
+            // Position two krathongs near each other
+            const baseLeft = Math.random() * (window.innerWidth - 220) + 20;
+            const k1 = createKrathongElement(krathongImage, baseLeft);
+            const k2 = createKrathongElement(krathongImage, baseLeft + 70);
+
+            // Slightly offset animation start so they don't overlap perfectly
+            k1.style.animationDelay = '0s';
+            k2.style.animationDelay = '0.6s';
+
+            river.appendChild(k1);
+            river.appendChild(k2);
+
+            msg.textContent = `${name1} กับ ${name2} ได้ลอยกระทงร่วมกัน — กระทงทั้งสองได้ลอยลงสู่แม่น้ำน่าน!`;
+        }
+    </script>
+</body>
+</html>
